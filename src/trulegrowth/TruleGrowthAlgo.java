@@ -5,7 +5,6 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -16,29 +15,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.stream.Collectors;
-
+import recommendation.Rule;
+import util.Utility;
 import tools.ArraysAlgos;
 import sequence_database_list_integers.Sequence;
 import sequence_database_list_integers.SequenceDatabase;
 import tools.MemoryLogger;
 
-/**
- * This is the original implementation of the TRULEGROWTH algorithm for mining sequential rules 
- * with a window size constraint. The TRuleGrowth algorithm is a variation of the RuleGrowth algorithm
- * described in this paper:
- * <br/><br/>
- * 
- * Fournier-Viger, P., Wu, C.-W., Tseng, V.S., Nkambou, R. (2012). 
- *  Mining Sequential Rules Common to Several Sequences with the Window Size Constraint. 
- *  Proceedings of the 25th Canadian Conf. on Artificial Intelligence (AI 2012), 
- *  Springer, LNAI 7310, pp.299-304. 
- * <br/><br/>
- *  
- *@see Sequence
- *@see SequenceDatabase
- *@author Philippe Fournier-Viger
- */
+
 public class TruleGrowthAlgo{
 	
 	// *** for statistics ***
@@ -75,7 +59,7 @@ public class TruleGrowthAlgo{
 	int maxConsequentSize = Integer.MAX_VALUE;
 
 	//To store the rules
-	LinkedList<LinkedList<Object>> rules;
+	LinkedList<Rule> rules;
 
 	/**
 	 * Default constructor
@@ -92,9 +76,9 @@ public class TruleGrowthAlgo{
 	 * @param windowSize a window size
 	 * @throws IOException exception if there is an error reading/writing files
 	 */
-	public LinkedList<LinkedList<Object>> runAlgorithm(double minSupport, double minConfidence, String input, String output, int windowSize ) throws IOException{
+	public LinkedList<Rule> runAlgorithm(double minSupport, double minConfidence, String input, String output, int windowSize ) throws IOException{
 		
-		rules = new LinkedList<LinkedList<Object>>();
+		rules = new LinkedList<Rule>();
 		// load the input file into memory
 		try {
 			this.database = new SequenceDatabase();
@@ -899,6 +883,7 @@ public class TruleGrowthAlgo{
 		return mapItemCount;
 	}
 	
+
 	/**
 	 * Save a rule I ==> J to the output file
 	 * @param tidsIJ the tids containing the rule
@@ -910,21 +895,20 @@ public class TruleGrowthAlgo{
 	private void saveRule(Set<Integer> tidsIJ, double confIJ, int[] itemsetI, int[] itemsetJ) throws IOException {
 		// increase the number of rule found
 		ruleCount++;
-		LinkedList<Object> l = new LinkedList();
-		
+		Rule r = new Rule();
 		
 		
 		//System.out.println(tidsIJ);
 		//System.out.println(itemsetI);
 		//System.out.println(itemsetJ);
 		//System.out.println(confIJ);
+		r.setRuleLeft(Utility.convertArraytoArrayList(itemsetI));
+		r.setRuleRight(Utility.convertArraytoArrayList(itemsetJ));
+		r.setSupport(tidsIJ.size());
+		r.setConf(confIJ);
+
 		
-		l.add(Arrays.stream(itemsetI).boxed().collect(Collectors.toList()));
-		l.add(Arrays.stream(itemsetJ).boxed().collect(Collectors.toList()));
-		l.add(tidsIJ.size());
-		l.add(confIJ);
-		
-		rules.add(l);
+		rules.add(r);
 		// create a string buffer
 		StringBuilder buffer = new StringBuilder();
 		

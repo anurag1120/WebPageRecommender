@@ -4,17 +4,18 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.Set;
+
 
 import trulegrowth.TruleGrowthAlgo;
 
 
 public class Main {
 
-	static LinkedList<LinkedList<Object>> rules;
+	static LinkedList<Rule> rules;
 	public static void main(String [] arg) throws IOException{
 		String input = fileToPath("input.txt");  // the database
 		String output = "./output.txt";  // the path for saving the frequent itemsets found
@@ -37,9 +38,14 @@ public class Main {
 
 		rules = algo.runAlgorithm(minsup, minconf, input, output, windowSize);
 
-		//System.out.println(rules);
-		LinkedList<Integer> sample = new LinkedList<Integer>();
-		sample.add(55267);
+		
+		ArrayList<Integer> sample = new ArrayList<Integer>();
+		sample.add(1);
+		//sample.add(4);
+		//sorting with support and conf
+		Collections.sort(rules,
+		new RuleSortingComparator());
+		System.out.println(rules);
 		System.out.println(getRecommendations(sample,8,3));
 		// print statistics
 		algo.printStats();
@@ -54,19 +60,20 @@ public class Main {
 	//for single pattern
 	//thershold : no of pages already browsed by user
 	//prediction: max no of recommendations
-	public static Set<Integer> getRecommendations(LinkedList<Integer> pattern,int threshold,int prediction){
+	public static Set<Integer> getRecommendations(ArrayList<Integer> pattern,int threshold,int prediction){
 		Set<Integer> recommendedWebpages = new HashSet<Integer>();
-		LinkedList<Integer> cutoffPattern = new LinkedList();
+		ArrayList<Integer> cutoffPattern = new ArrayList<Integer>();
 		int currentPredictions = 0;
 		for(int i=0;i<pattern.size()&&i<threshold;i++) {
 			cutoffPattern.add(pattern.get(i));
 		}
 		for(int i=0;i<rules.size();i++) {
-			LinkedList<Object> l = rules.get(i);
-			ArrayList<Object> ruleRight =  (ArrayList<Object>) l.get(1);
+			Rule r = rules.get(i);
+			ArrayList<Integer> ruleRight =  r.getRuleRight();
+			ArrayList<Integer> ruleLeft =  r.getRuleLeft();
 			int predictedWebPage = 0;
-			if(ruleRight.size()>0) predictedWebPage =  (int) ruleRight.get(0);
-			if(cutoffPattern.equals(l.get(0))) {
+			if(ruleRight.size()>0) predictedWebPage =   ruleRight.get(0);
+			if(cutoffPattern.equals(ruleLeft)) {
 				currentPredictions++;
 				if(currentPredictions>prediction) {
 					break;
