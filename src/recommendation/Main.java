@@ -6,6 +6,8 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.Set;
 
@@ -59,11 +61,11 @@ public class Main {
 	
 	//for single pattern
 	//thershold : no of pages already browsed by user
-	//prediction: max no of recommendations
+	//prediction:  no of recommendations
 	public static Set<Integer> getRecommendations(ArrayList<Integer> pattern,int threshold,int prediction){
-		Set<Integer> recommendedWebpages = new HashSet<Integer>();
+		LinkedHashSet<Integer> recommendedWebpages = new LinkedHashSet<Integer>();
+		LinkedHashSet<Integer> popularWebpages = new LinkedHashSet<Integer>();
 		ArrayList<Integer> cutoffPattern = new ArrayList<Integer>();
-		int currentPredictions = 0;
 		for(int i=0;i<pattern.size()&&i<threshold;i++) {
 			cutoffPattern.add(pattern.get(i));
 		}
@@ -71,15 +73,21 @@ public class Main {
 			Rule r = rules.get(i);
 			ArrayList<Integer> ruleRight =  r.getRuleRight();
 			ArrayList<Integer> ruleLeft =  r.getRuleLeft();
-			int predictedWebPage = 0;
-			if(ruleRight.size()>0) predictedWebPage =   ruleRight.get(0);
 			if(cutoffPattern.equals(ruleLeft)) {
-				currentPredictions++;
-				if(currentPredictions>prediction) {
+				if(recommendedWebpages.size()>prediction) {
 					break;
 				}else {
-					recommendedWebpages.add(predictedWebPage);
+					recommendedWebpages.addAll(ruleRight);
 				}
+			}else{
+				if(popularWebpages.size()<prediction) popularWebpages.addAll(ruleRight);
+			}
+		}
+		//in all cases (except where there are no rules) try to recommend atleast 3 pages
+		Iterator itr = popularWebpages.iterator();
+		if(recommendedWebpages.size()<prediction){
+			for(int i=1;i<=prediction-recommendedWebpages.size();i++){
+				if(itr.hasNext()) recommendedWebpages.add((Integer)itr.next());
 			}
 		}
 		return recommendedWebpages;
