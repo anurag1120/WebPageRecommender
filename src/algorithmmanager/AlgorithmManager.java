@@ -14,7 +14,7 @@ import java.util.jar.JarFile;
 
 
 /**
- * This class is used to load the list of all available algorithms available in SPMF.
+ * This class is used to load the list of all available algorithms available.
  */
 
 public class AlgorithmManager {
@@ -63,7 +63,7 @@ public class AlgorithmManager {
 	}
 	
 	/**
-	 * Get the list of algorithms as String as displayed by the user interface of SPMF. The name of the first category appears,
+	 * Get the list of algorithms as String as displayed by the user interface . The name of the first category appears,
 	 * followed by the list of algorithms in the first category. Then, it is followed by the second category and so on...
 	 * @param includeTools include tools in the list
 	 * @param includeAlgorithms include algorithms in the list
@@ -100,6 +100,7 @@ public class AlgorithmManager {
 			listOfNames.add(algorithm.getName());
 			
 		}
+		System.out.println("Algorithm names"+listOfNames);
 		// Return the list
 		return listOfNames;
 	}
@@ -167,12 +168,14 @@ public class AlgorithmManager {
 			String entryName;
 			for (File actual : contenuti) {
 				entryName = actual.getName();
+			//	System.out.println("entryName in alog manger "+entryName);
 				if (entryName.endsWith(".class")) {
 					entryName = entryName.substring(0, entryName.lastIndexOf('.'));
 					// Get the class
 					Class theClass = Class.forName(originalPackageName + entryName);
 					if(theClass.getSuperclass().equals(DescriptionOfAlgorithm.class)){
 						DescriptionOfAlgorithm instance = (DescriptionOfAlgorithm) theClass.newInstance();
+						System.out.println("instance in alog manger "+instance);
 						classes.add(instance);
 					}
 				}
@@ -187,7 +190,10 @@ public class AlgorithmManager {
 	 * @return the description of the algorithm (a DescriptionOfAlgorithm object), or null if not found
 	 */
 	public DescriptionOfAlgorithm getDescriptionOfAlgorithm(String nameOfAlgorithm) {
+		System.out.println(nameOfAlgorithm+", "+algorithms);
+
 		for(DescriptionOfAlgorithm algorithm : algorithms){
+			System.out.println(algorithm.getName());
 			// if this algorithm belong to a new category, we will add the category name to the list of algorithms
 			if(algorithm.getName().equals(nameOfAlgorithm)){
 				return algorithm;

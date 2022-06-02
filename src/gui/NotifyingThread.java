@@ -1,12 +1,16 @@
 package gui;
 
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
+
+import recommendation.Rule;
 
 
 /**
  * This class is a Java thread that will notify another thead when it has terminated
- * its task. It is used in the SPMF GUI by the user interface to get notified when
+ * its task. It is used in the GUI by the user interface to get notified when
  * an algorithm that was launched by the user has terminated.
  * 
  * This class is implemented using the "listener" design pattern.

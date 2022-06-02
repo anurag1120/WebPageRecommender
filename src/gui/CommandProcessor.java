@@ -6,20 +6,24 @@ import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.Map;
 
 import algorithmmanager.AlgorithmManager;
 import algorithmmanager.DescriptionOfAlgorithm;
 import algorithmmanager.DescriptionOfParameter;
+import recommendation.Rule;
 
 /**
  * This class executes commands from the command line interface or
  * graphical interface to run the algorithms.
  */
 public class CommandProcessor {
-	
-	private CommandProcessor(){
-		
+
+	private CommandProcessor() {
+
 	}
 
 	/**
@@ -124,27 +128,50 @@ public class CommandProcessor {
 			}
 		}
 					// ******  WE  APPLY THE DESIRED ALGORITHM ******
-				algorithm.runAlgorithm(parameters, inputFile, outputFile);
+				 algorithm.runAlgorithm(parameters, inputFile, outputFile);
+				 if(algorithmName=="TRuleGrowth"){
+					System.out.println(
+						"The Generated Rules are"
+					);
+					for(int i=0;i<algorithm.rules.size();i++){
+						System.out.println(algorithm.rules.get(i));
+					}
+				 }
+				 else if(algorithmName=="Recommender"){
+					System.out.println(
+						"The Generated Recommendations are"
+					);
+					Iterator itr = algorithm.recommendations.iterator();
+					while(itr.hasNext()){
+						System.out.println(itr.next());
+					}
+				 }
+				 				 
 	}
-			
+
+	public static void processGetRecommendationsCommandFromGUI() {
+
+	}
 
 	/**
 	 * Convert an integer number to its ordinal
+	 * 
 	 * @param i the number
 	 * @return its ordinal as a String
 	 */
 	public static String ordinal(int i) {
-		// Code from : http://stackoverflow.com/questions/6810336/is-there-a-library-or-utility-in-java-to-convert-an-integer-to-its-ordinal
-	    String[] sufixes = new String[] { "th", "st", "nd", "rd", "th", "th", "th", "th", "th", "th" };
-	    switch (i % 100) {
-	    case 11:
-	    case 12:
-	    case 13:
-	        return i + "th";
-	    default:
-	        return i + sufixes[i % 10];
+		// Code from :
+		// http://stackoverflow.com/questions/6810336/is-there-a-library-or-utility-in-java-to-convert-an-integer-to-its-ordinal
+		String[] sufixes = new String[] { "th", "st", "nd", "rd", "th", "th", "th", "th", "th", "th" };
+		switch (i % 100) {
+			case 11:
+			case 12:
+			case 13:
+				return i + "th";
+			default:
+				return i + sufixes[i % 10];
 
-	    }
+		}
 	}
 
 }

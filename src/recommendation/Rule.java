@@ -8,6 +8,14 @@ public class Rule{
     private ArrayList<Integer> ruleRight;
     private Integer support;
     private Double conf;
+    public Rule() {
+    }
+    public Rule(ArrayList<Integer> ruleLeft, ArrayList<Integer> ruleRight, Integer support, Double conf) {
+        this.ruleLeft = ruleLeft;
+        this.ruleRight = ruleRight;
+        this.support = support;
+        this.conf = conf;
+    }
     public ArrayList<Integer> getRuleLeft() {
         return ruleLeft;
     }
@@ -32,9 +40,6 @@ public class Rule{
     public void setRuleLeft(ArrayList<Integer> ruleLeft) {
         this.ruleLeft = ruleLeft;
     }
-
-    
-
     @Override
     public String toString() {
       String output = "[";

@@ -38,7 +38,7 @@ public class Main {
 		// right side (consequent) of rules found:
 //		algo.setMaxConsequentSize(2);  // optional
 
-		rules = algo.runAlgorithm(minsup, minconf, input, output, windowSize);
+		 algo.runAlgorithm(minsup, minconf, input, output, windowSize);
 
 		
 		ArrayList<Integer> sample = new ArrayList<Integer>();
@@ -48,7 +48,7 @@ public class Main {
 		Collections.sort(rules,
 		new RuleSortingComparator());
 		System.out.println(rules);
-		System.out.println(getRecommendations(sample,8,3));
+		System.out.println(getRecommendationsinMain(sample,8,3));
 		// print statistics
 		algo.printStats();
 	}
@@ -62,13 +62,15 @@ public class Main {
 	//for single pattern
 	//thershold : no of pages already browsed by user
 	//prediction:  no of recommendations
-	public static Set<Integer> getRecommendations(ArrayList<Integer> pattern,int threshold,int prediction){
+	public static LinkedHashSet<Integer> getRecommendationsinMain(ArrayList<Integer> pattern,int threshold,int prediction){
 		LinkedHashSet<Integer> recommendedWebpages = new LinkedHashSet<Integer>();
 		LinkedHashSet<Integer> popularWebpages = new LinkedHashSet<Integer>();
 		ArrayList<Integer> cutoffPattern = new ArrayList<Integer>();
 		for(int i=0;i<pattern.size()&&i<threshold;i++) {
-			cutoffPattern.add(pattern.get(i));
+			cutoffPattern.add(pattern.get(pattern.size()-i-1));
 		}
+		//for getting better recommedations
+		Collections.reverse(cutoffPattern);
 		for(int i=0;i<rules.size();i++) {
 			Rule r = rules.get(i);
 			ArrayList<Integer> ruleRight =  r.getRuleRight();

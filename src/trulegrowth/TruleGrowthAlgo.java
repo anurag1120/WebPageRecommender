@@ -67,6 +67,9 @@ public class TruleGrowthAlgo{
 	public TruleGrowthAlgo() {
 	}
 	
+	public LinkedList<Rule> getRules(){
+		return rules;
+	}
 	/**
 	 * Run the algorithm.  
 	 * @param minSupport  Minsup as a percentage (ex: 0.05 = 5 %)
@@ -76,7 +79,7 @@ public class TruleGrowthAlgo{
 	 * @param windowSize a window size
 	 * @throws IOException exception if there is an error reading/writing files
 	 */
-	public LinkedList<Rule> runAlgorithm(double minSupport, double minConfidence, String input, String output, int windowSize ) throws IOException{
+	public void runAlgorithm(double minSupport, double minConfidence, String input, String output, int windowSize ) throws IOException{
 		
 		rules = new LinkedList<Rule>();
 		// load the input file into memory
@@ -91,7 +94,6 @@ public class TruleGrowthAlgo{
 		this.minsuppRelative = (int) Math.ceil(minSupport * database.size());
 		// run the algorithm
 		runAlgorithm(input, output, minsuppRelative, minConfidence, windowSize);
-		return rules;
 	}
 	
 	/**

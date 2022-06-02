@@ -1,28 +1,26 @@
-package algorithmmanager;
+package algorithmmanager.descriptions;
 
 import java.io.IOException;
-import java.util.LinkedHashMap;
+import java.util.ArrayList;
 import java.util.LinkedHashSet;
-import java.util.LinkedList;
 
-import recommendation.Rule;
+import algorithmmanager.DescriptionOfAlgorithm;
+import algorithmmanager.DescriptionOfParameter;
+import recommendation.Recommender;
 
-public abstract class DescriptionOfAlgorithm {
 
-	public LinkedList<Rule> rules;
-	public LinkedHashSet<Integer> recommendations;
+public  class DescrpitionAlgoRecommender extends DescriptionOfAlgorithm{
 	
-	/** get the  name of the author of the implementation */
-	public abstract String getImplementationAuthorNames();
 
 	/** get the name of the algorithm (e.g. "Rulegrowth") */
-	public  abstract String getName();
+	public String getName() {
+		return "Recommender";
+	}
 
 	/** get the category of this algorithm (e.g. "sequential rule mining" */
-	public  abstract String getAlgorithmCategory();
-
-	/** get the URL providing a documentation of how to use this algorithm */
-	public abstract String getURLOfDocumentation();
+	public String getAlgorithmCategory() {
+		return "SEQUENTIAL RULE MINING";
+	}
 
 
 	/**
@@ -39,20 +37,45 @@ public abstract class DescriptionOfAlgorithm {
 	 * @throws IOException
 	 *             exception if an error occurs
 	 */
-	public abstract void runAlgorithm(String[] parameters, String inputFile,
-			String outputFile) throws Exception;
+	public  void runAlgorithm(String[] parameters, String inputFile,
+			String outputFile) throws Exception{
+                ArrayList<Integer> userSeq = getParamAsArrayList(parameters[0]);
+                int p = getParamAsInteger(parameters[1]);
+                Recommender algo = new Recommender();
+				algo.runAlgorithm(userSeq, p, inputFile, outputFile);
+				algo.printStats();
+				this.recommendations= algo.getRecomms();
+				System.out.println("recomms in Descripto"+this.recommendations);
+
+        }
 	
+	public ArrayList<Integer> getParamAsArrayList(String line) {
+		String[] arr = line.split(" ");
+		ArrayList<Integer> userSeq = new ArrayList<Integer>();
+		for(String a: arr){
+			if(a.matches("-?\\d+(\\.\\d+)?")) userSeq.add(Integer.parseInt(a));
+		}
+		return userSeq;
+	}
+
 	/**
 	 * Get a description of the algorithm's parameters
 	 * @return a list of AlgorithmParameter objects describing the parameters of the algorithm.
 	 */
-	public abstract DescriptionOfParameter[] getParametersDescription();
+	public  DescriptionOfParameter[] getParametersDescription(){
+        DescriptionOfParameter[] parameters = new DescriptionOfParameter[2];
+		parameters[0] = new DescriptionOfParameter("User Sequence","(e.g. '2 3 4 5')", String.class, false);
+		parameters[1] = new DescriptionOfParameter("Max no of Predictions ", "(e.g. 4 items)", Integer.class, false);
+		return parameters;
+    }
 	
 	/**
 	 * Get at list of file types (Strings) representing the input file format taken as input by the algorithm.
 	 * @return a list of file types (Strings) or null if the algorithm does not take an input file as input.
 	 */
-	public abstract String[] getInputFileTypes();
+	public String[] getInputFileTypes() {
+		return new String[]{"Rules in textfiles"};
+	}
 	
 //	/**
 //	 * Get at list of special file types supported by this algorithm such as the ARFF file format.
@@ -64,7 +87,9 @@ public abstract class DescriptionOfAlgorithm {
 	 * Get at list of file types (Strings) representing the  output file format taken as input by the algorithm.
 	 * @return a list of file types (Strings) or null if the algorithm does not output a file.
 	 */
-	public abstract String[] getOutputFileTypes();
+	public  String[] getOutputFileTypes(){
+		return new String[]{"Recommendations"};
+	}
 	
 
 	/**
@@ -167,6 +192,18 @@ public abstract class DescriptionOfAlgorithm {
 		
 		// Otherwise, the value is of the correct type
 		return true;
+	}
+
+	@Override
+	public String getImplementationAuthorNames() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String getURLOfDocumentation() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

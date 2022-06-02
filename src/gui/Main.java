@@ -1,23 +1,6 @@
 package gui;
 
-/*
- * Copyright (c) 2008-2021 Philippe Fournier-Viger
- *
- * This file is part of the SPMF DATA MINING SOFTWARE
- * (http://www.philippe-fournier-viger.com/spmf).
- *
- * SPMF is free software: you can redistribute it and/or modify it under the
- * terms of the GNU General Public License as published by the Free Software
- * Foundation, either version 3 of the License, or (at your option) any later
- * version.
- *
- * SPMF is distributed in the hope that it will be useful, but WITHOUT ANY
- * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
- * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License along with
- * SPMF. If not, see <http://www.gnu.org/licenses/>.
- */
+
 import java.lang.reflect.Method;
 
 import algorithmmanager.AlgorithmManager;
@@ -52,18 +35,10 @@ public class Main {
 	}
 
 	/**
-	 * This method process the command line arguments when the spmf.jar file is
-	 * called from the command line.
 	 *
 	 * @param args command line arguments.
 	 */
 	public static void processCommandLineArguments(String[] args) {
-		// java -Xmx1024m -jar spmfGUIv090b.jar run PrefixSpan
-		// /home/ph/Bureau/contextPrefixSpan.txt /home/ph/Bureau/test3.txt 60%
-		// java -Xmx1024m -jar spmfGUIv090b.jar run PrefixSpan contextPrefixSpan.txt
-		// test3.txt 60%
-//		System.out.println(" \n\n-- SPMF version " + SPMF_VERSION + " --\n\n");
-
 		// "version" --> show the current version
 	 if ("run".equals(args[0])) {
 

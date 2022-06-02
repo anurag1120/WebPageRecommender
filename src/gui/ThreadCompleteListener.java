@@ -4,7 +4,7 @@ package gui;
 /**
  * This interface should be implemented by classes that want to listen to a NotifyingThread.
  * A NotifyingThread is a thread that notify its listeners when it terminates.
- * It is used in the GUI of SPMF so that the GUI get notified when an algorithm terminates.
+ * It is used in the GUI  so that the GUI get notified when an algorithm terminates.
  * 
  * This class follows the "listener" design pattern.
  * 

@@ -1,22 +1,5 @@
 package gui;
-/*
- * Copyright (c) 2008-2015 Philippe Fournier-Viger
- *
- * This file is part of the SPMF DATA MINING SOFTWARE
- * (http://www.philippe-fournier-viger.com/spmf).
- *
- * SPMF is free software: you can redistribute it and/or modify it under the
- * terms of the GNU General Public License as published by the Free Software
- * Foundation, either version 3 of the License, or (at your option) any later
- * version.
- *
- * SPMF is distributed in the hope that it will be useful, but WITHOUT ANY
- * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
- * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License along with
- * SPMF. If not, see <http://www.gnu.org/licenses/>.
- */
+
 import java.awt.Desktop;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -34,6 +17,8 @@ import java.lang.Thread.UncaughtExceptionHandler;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Vector;
 
@@ -51,17 +36,17 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
-
 import algorithmmanager.AlgorithmManager;
 import algorithmmanager.DescriptionOfAlgorithm;
 import algorithmmanager.DescriptionOfParameter;
+import javax.swing.*;
+import java.awt.*;
 import input.TestInput;
+import recommendation.Rule;
 
 /**
- * This class is the user interface of SPMF (the main Window).
+ * This class is the user interface  (the main Window).
  * It allows the user to launch single algorithms.
- * 
- * @author Philippe Fournier-Viger
  */
 public class MainWindow extends JFrame implements ThreadCompleteListener, UncaughtExceptionHandler {
 
@@ -102,10 +87,10 @@ public class MainWindow extends JFrame implements ThreadCompleteListener, Uncaug
     private JTextArea textArea;
     private JButton buttonRun;
     private JCheckBox checkboxOpenOutputText;
-    private JButton buttonExample;
     private JLabel lblSetOutputFile;
     private JButton buttonOutput;
     private JButton buttonInput;
+    private JButton buttonShowRecommendations;
     private JLabel lblChooseInputFile;
     private JProgressBar progressBar;
     
@@ -127,8 +112,7 @@ public class MainWindow extends JFrame implements ThreadCompleteListener, Uncaug
     public MainWindow(boolean showTools, boolean showAlgorithms) {
     	this.showTools = showTools;
     	this.showAlgorithms = showAlgorithms;
-    	
-        setResizable(false);
+        setResizable(true);
         addWindowListener(new WindowAdapter() {
 
         	@Override
@@ -137,7 +121,6 @@ public class MainWindow extends JFrame implements ThreadCompleteListener, Uncaug
             }
         });
         
-        // For the new version of SPMF
         // We want to distinguish if the windows is used to run a dataset tool or another algorithm.
         if(showTools && !showAlgorithms){
         	setTitle("Prepare data (run a dataset tool)");
@@ -151,12 +134,16 @@ public class MainWindow extends JFrame implements ThreadCompleteListener, Uncaug
         }
         // When the user clicks the "x" the software will close.
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        // size of the window
-        setBounds(100, 100, 707, 682);
+        setExtendedState(JFrame.MAXIMIZED_BOTH); 
+        setUndecorated(false);
+        setVisible(true);
         contentPane = new JPanel();
+        contentPane.setLayout(null);
+
+
         contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
         setContentPane(contentPane);
-        contentPane.setLayout(null);
+       
 
         // Combo box to store the list of algorithms.
         comboBox = new JComboBox<String>(new Vector<String>());
@@ -195,7 +182,7 @@ public class MainWindow extends JFrame implements ThreadCompleteListener, Uncaug
 			}
         	
         });
-        comboBox.setBounds(263, 74, 367, 20);
+        comboBox.setBounds(360, 200, 367, 20);
         contentPane.add(comboBox);
 
         // The button "Run algorithm"
@@ -205,16 +192,35 @@ public class MainWindow extends JFrame implements ThreadCompleteListener, Uncaug
 
             public void actionPerformed(ActionEvent arg0) {
 
+                buttonShowRecommendations.setEnabled(true);
+
                 // When the user clicks "run":
-                processRunAlgorithmCommandFromGUI();
+                 processRunAlgorithmCommandFromGUI();
 
             }
         });
-        buttonRun.setBounds(301, 385, 119, 23);
+        buttonRun.setBounds(297, 385, 119, 23);
         contentPane.add(buttonRun);
 
+         // The button "Run algorithm"
+         buttonShowRecommendations = new JButton("Show Recommendations");
+         buttonShowRecommendations.setEnabled(false);
+         buttonShowRecommendations.addActionListener(new ActionListener() {
+ 
+             public void actionPerformed(ActionEvent arg0) {
+ 
+                 // When the user clicks "run":
+                 //TODO:
+                // processGetRecommendationsCommandFromGUI();
+ 
+             }
+         });
+         //TODO:
+         buttonShowRecommendations.setBounds(447, 385, 140, 23);
+         contentPane.add(buttonShowRecommendations);
+
         JLabel lblChooseAnAlgorithm = new JLabel("Choose an algorithm:");
-        lblChooseAnAlgorithm.setBounds(22, 73, 204, 20);
+        lblChooseAnAlgorithm.setBounds(119, 197, 204, 20);
         contentPane.add(lblChooseAnAlgorithm);
 
         JLabel lblNewLabel = new JLabel("New label");
@@ -222,16 +228,16 @@ public class MainWindow extends JFrame implements ThreadCompleteListener, Uncaug
 
             @Override
             public void mousePressed(MouseEvent arg0) {
-            	// Show the webpage of the SPMF project
-                openWebPage("http://www.philippe-fournier-viger.com/spmf/");
+            	// Show the webpage of the  project
+                openWebPage("https://github.com/anurag1120/WebPageRecommender");
             }
         });
-        lblNewLabel.setIcon(new ImageIcon(MainWindow.class.getResource("spmf.png")));
-        lblNewLabel.setBounds(12, 13, 140, 47);
+        lblNewLabel.setIcon(new ImageIcon(MainWindow.class.getResource("logo.jpg")));
+        lblNewLabel.setBounds(12, 13, 140, 50);
         contentPane.add(lblNewLabel);
 
         textFieldParam1 = new JTextField();
-        textFieldParam1.setBounds(263, 164, 157, 20);
+        textFieldParam1.setBounds(360, 290, 157, 20);
         contentPane.add(textFieldParam1);
         textFieldParam1.setColumns(10);
         
@@ -246,7 +252,7 @@ public class MainWindow extends JFrame implements ThreadCompleteListener, Uncaug
             }
         });
         
-        buttonInput.setBounds(430, 104, 32, 23);
+        buttonInput.setBounds(527, 231, 32, 23);
         contentPane.add(buttonInput);
 
         buttonOutput = new JButton("...");
@@ -256,69 +262,69 @@ public class MainWindow extends JFrame implements ThreadCompleteListener, Uncaug
                 askUserToChooseOutputFile();
             }
         });
-        buttonOutput.setBounds(430, 133, 32, 23);
+        buttonOutput.setBounds(527, 260, 32, 23);
         contentPane.add(buttonOutput);
 
         labelParam1 = new JLabel("Parameter 1:");
-        labelParam1.setBounds(22, 167, 204, 14);
+        labelParam1.setBounds(119, 291, 204, 14);
         contentPane.add(labelParam1);
 
         labelParam2 = new JLabel("Parameter 2:");
-        labelParam2.setBounds(22, 192, 204, 14);
+        labelParam2.setBounds(119, 312, 204, 14);
         contentPane.add(labelParam2);
 
         labelParam3 = new JLabel("Parameter 3:");
-        labelParam3.setBounds(22, 217, 204, 14);
+        labelParam3.setBounds(119, 341, 204, 14);
         contentPane.add(labelParam3);
 
         labelParam4 = new JLabel("Parameter 4:");
-        labelParam4.setBounds(22, 239, 231, 14);
+        labelParam4.setBounds(119, 363, 231, 14);
         contentPane.add(labelParam4);
 
         labelParam5 = new JLabel("Parameter 5:");
-        labelParam5.setBounds(22, 264, 231, 14);
+        labelParam5.setBounds(119, 388, 231, 14);
         contentPane.add(labelParam5);
 
         labelParam6 = new JLabel("Parameter 6:");
-        labelParam6.setBounds(22, 289, 231, 14);
+        labelParam6.setBounds(119, 413, 231, 14);
         contentPane.add(labelParam6);
         
         labelParam7 = new JLabel("Parameter 7:");
-        labelParam7.setBounds(22, 310, 231, 14);
+        labelParam7.setBounds(119, 434, 231, 14);
         contentPane.add(labelParam7);
 
         textFieldParam2 = new JTextField();
         textFieldParam2.setColumns(10);
-        textFieldParam2.setBounds(263, 189, 157, 20);
+        textFieldParam2.setBounds(360, 315, 157, 20);
         contentPane.add(textFieldParam2);
 
         textFieldParam3 = new JTextField();
         textFieldParam3.setColumns(10);
-        textFieldParam3.setBounds(263, 214, 157, 20);
+        textFieldParam3.setBounds(360, 340, 157, 20);
         contentPane.add(textFieldParam3);
 
         textFieldParam4 = new JTextField();
         textFieldParam4.setColumns(10);
-        textFieldParam4.setBounds(263, 236, 157, 20);
+        textFieldParam4.setBounds(360, 365, 157, 20);
         contentPane.add(textFieldParam4);
 
         textFieldParam5 = new JTextField();
         textFieldParam5.setColumns(10);
-        textFieldParam5.setBounds(263, 261, 157, 20);
+        textFieldParam5.setBounds(360, 390, 157, 20);
         contentPane.add(textFieldParam5);
 
         textFieldParam6 = new JTextField();
         textFieldParam6.setColumns(10);
-        textFieldParam6.setBounds(263, 286, 157, 20);
+        textFieldParam6.setBounds(360, 415, 157, 20);
         contentPane.add(textFieldParam6);
         
         textFieldParam7 = new JTextField();
         textFieldParam7.setColumns(10);
-        textFieldParam7.setBounds(263, 310, 157, 20);
+        textFieldParam7.setBounds(360, 440, 157, 20);
         contentPane.add(textFieldParam7);
 
         JScrollPane scrollPane = new JScrollPane();
-        scrollPane.setBounds(12, 456, 681, 170);
+        scrollPane.setBounds(750, 200, 581, 400);
         contentPane.add(scrollPane);
 
         textArea = new JTextArea();
@@ -327,14 +333,14 @@ public class MainWindow extends JFrame implements ThreadCompleteListener, Uncaug
 
         textFieldInput = new JTextField();
         textFieldInput.setEditable(false);
-        textFieldInput.setBounds(263, 105, 157, 20);
+        textFieldInput.setBounds(360, 231, 157, 20);
         contentPane.add(textFieldInput);
         textFieldInput.setColumns(10);
 
         textFieldOutput = new JTextField();
         textFieldOutput.setEditable(false);
         textFieldOutput.setColumns(10);
-        textFieldOutput.setBounds(263, 134, 157, 20);
+        textFieldOutput.setBounds(360, 260, 157, 20);
         contentPane.add(textFieldOutput);
         
         checkboxOpenOutputText = new JCheckBox("text editor");
@@ -342,69 +348,48 @@ public class MainWindow extends JFrame implements ThreadCompleteListener, Uncaug
         checkboxOpenOutputText.setBounds(44, 351, 85, 23);
         contentPane.add(checkboxOpenOutputText);
 
-        buttonExample = new JButton("?");
-        buttonExample.setEnabled(false);
-        buttonExample.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent arg0) {
-
-                // When the user clicks on the "?",
-                // we open the webpage corresponding to the algorithm
-                // that is currently selected.
-                String choice = (String) comboBox.getSelectedItem();
-                try {
-					openHelpWebPageForAlgorithm(choice);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-            }
-
-			
-        });
-        buttonExample.setBounds(642, 73, 49, 23);
-        contentPane.add(buttonExample);
-
         lblChooseInputFile = new JLabel("Choose input file");
-        lblChooseInputFile.setBounds(22, 108, 97, 14);
+        lblChooseInputFile.setBounds(119, 234, 97, 14);
         contentPane.add(lblChooseInputFile);
 
         lblSetOutputFile = new JLabel("Set output file");
-        lblSetOutputFile.setBounds(22, 137, 97, 14);
+        lblSetOutputFile.setBounds(119, 261, 97, 14);
         contentPane.add(lblSetOutputFile);
 
         lbHelp1 = new JLabel("help1");
-        lbHelp1.setBounds(430, 167, 211, 14);
+        lbHelp1.setBounds(527, 290, 211, 14);
         contentPane.add(lbHelp1);
 
         lbHelp2 = new JLabel("help2");
-        lbHelp2.setBounds(430, 192, 211, 14);
+        lbHelp2.setBounds(527, 315, 211, 14);
         contentPane.add(lbHelp2);
 
         lbHelp3 = new JLabel("help3");
-        lbHelp3.setBounds(430, 217, 200, 14);
+        lbHelp3.setBounds(527, 340, 200, 14);
         contentPane.add(lbHelp3);
 
         lbHelp4 = new JLabel("help4");
-        lbHelp4.setBounds(430, 239, 200, 14);
+        lbHelp4.setBounds(527, 365, 200, 14);
         contentPane.add(lbHelp4);
 
         lbHelp5 = new JLabel("help5");
-        lbHelp5.setBounds(430, 264, 200, 14);
+        lbHelp5.setBounds(527, 390, 200, 14);
         contentPane.add(lbHelp5);
 
         lbHelp6 = new JLabel("help6");
-        lbHelp6.setBounds(430, 289, 200, 14);
+        lbHelp6.setBounds(527, 415, 200, 14);
         contentPane.add(lbHelp6);
         
         lbHelp7 = new JLabel("help7");
-        lbHelp7.setBounds(430, 310, 200, 14);
+        lbHelp7.setBounds(527, 440, 200, 14);
         contentPane.add(lbHelp7);
         
         progressBar = new JProgressBar();
-        progressBar.setBounds(273, 424, 163, 16);
+        progressBar.setBounds(273, 600, 163, 16);
         contentPane.add(progressBar);
         
         lblOpenOutputFile = new JLabel("Open output file using: ");
-        lblOpenOutputFile.setBounds(22, 329, 191, 20);
+        lblOpenOutputFile.setBounds(119, 600, 191, 20);
         contentPane.add(lblOpenOutputFile);
         hideAllParams();
     }
@@ -422,7 +407,6 @@ public class MainWindow extends JFrame implements ThreadCompleteListener, Uncaug
         // COMBOBOX ITEM SELECTION - ITEM STATE CHANGED
         if (isSelected) {
             buttonRun.setEnabled(true);
-            buttonExample.setEnabled(true);
             
             
             //************************************************************************
@@ -441,6 +425,7 @@ public class MainWindow extends JFrame implements ThreadCompleteListener, Uncaug
     			DescriptionOfParameter[] parameters = algorithm.getParametersDescription();
     			for(int i=0; i< parameters.length; i++){
     				DescriptionOfParameter parameter = parameters[i];
+                    System.out.println(parameter.name);
     				String optional = parameter.isOptional ? " (optional)" : "";
     				setParam(textFieldsParams[i], parameter.name + optional, labelsParams[i], parameter.example);
     			}
@@ -465,20 +450,16 @@ public class MainWindow extends JFrame implements ThreadCompleteListener, Uncaug
                 // This is for the command line version
                 // If the name of the algorithm is not recognized:
                 if (isVisible() == false) {
-                    System.out.println("There is no algorithm with this name. "
-                            + " To fix this problem, you may check the command syntax in the SPMF documentation"
-                            + " and/or verify if there is a new version of SPMF on the SPMF website.");
+                    System.out.println("There is no algorithm with this name. ");
                 }
 
                 hideAllParams();
                 buttonRun.setEnabled(false);
-                buttonExample.setEnabled(false);
             }
         } else {
             // if no algorithm is chosen, we hide all parameters.
             hideAllParams();
             buttonRun.setEnabled(false);
-            buttonExample.setEnabled(false);
         }
 	}
 
@@ -618,7 +599,7 @@ public class MainWindow extends JFrame implements ThreadCompleteListener, Uncaug
 		    if (previousPath == null) {
 		        // If there is no previous path (first time user), 
 		        // show the files in the "examples" package of
-		        // the spmf distribution.
+
 		        URL main = TestInput.class.getResource("TestInput.class");
 		        if (!"file".equalsIgnoreCase(main.getProtocol())) {
 		            path = null;
@@ -626,7 +607,7 @@ public class MainWindow extends JFrame implements ThreadCompleteListener, Uncaug
 		            path = new File(main.getPath());
 		        }
 		    } else {
-		        // Otherwise, the user used SPMF before, so
+		        // Otherwise, the user used  before, so
 		        // we show the last path that he used.
 		        path = new File(previousPath);
 		    }
@@ -667,7 +648,6 @@ public class MainWindow extends JFrame implements ThreadCompleteListener, Uncaug
 		    String previousPath = PreferencesManager.getInstance().getOutputFilePath();
 		    // If there is no previous path (first time user), 
 		    // show the files in the "examples" package of
-		    // the spmf distribution.
 		    if (previousPath == null) {
 		        URL main = TestInput.class.getResource("TestInput.class");
 		        if (!"file".equalsIgnoreCase(main.getProtocol())) {
@@ -790,6 +770,7 @@ public class MainWindow extends JFrame implements ThreadCompleteListener, Uncaug
 	 * to launch the chosen algorithm and thereafter catch exception if one occurs.
 	 */
 	private void processRunAlgorithmCommandFromGUI() {
+        LinkedList<Rule> rules = new LinkedList<Rule>();
 		// If a thread is already running (the user click on the stop Button
 		if(currentRunningAlgorithmThread != null &&
 				currentRunningAlgorithmThread.isAlive()) {
@@ -800,7 +781,6 @@ public class MainWindow extends JFrame implements ThreadCompleteListener, Uncaug
 			buttonRun.setText("Run algorithm");
 	        progressBar.setIndeterminate(false);
 	        comboBox.setEnabled(true);
-			return;
 		}
 		
 		
@@ -830,7 +810,7 @@ public class MainWindow extends JFrame implements ThreadCompleteListener, Uncaug
 		currentRunningAlgorithmThread = new NotifyingThread() {
 			@Override
 			public void doRun() throws Exception {
-				CommandProcessor.runAlgorithm(choice, inputFile, outputFile, parameters);
+                CommandProcessor.runAlgorithm(choice, inputFile, outputFile, parameters);
 			}
 		};
 		// The main thread will listen for the completion of the algorithm
@@ -840,5 +820,81 @@ public class MainWindow extends JFrame implements ThreadCompleteListener, Uncaug
 		currentRunningAlgorithmThread.setUncaughtExceptionHandler(this);
 		// Run the thread
 		currentRunningAlgorithmThread.start();
+
+        try {
+            currentRunningAlgorithmThread.join();
+        } catch (InterruptedException e) {
+            System.out.println("error in joining threads"+ e.getMessage());
+            e.printStackTrace();
+        }
 	}
+
+	/**
+	 * This method is called when the user click the "Run" or "Stop" button of the user interface,
+	 * to launch the chosen algorithm and thereafter catch exception if one occurs.
+	 */
+	private void processShowRecommendationsCommandFromGUI() {
+      /*  
+		// If a thread is already running (the user click on the stop Button
+		if(currentRunningAlgorithmThread != null &&
+				currentRunningAlgorithmThread.isAlive()) {
+			// stop that thread
+			currentRunningAlgorithmThread.stop();
+			
+			textArea.setText("Algorithm stopped. \n");
+			buttonRun.setText("Run algorithm");
+	        progressBar.setIndeterminate(false);
+	        comboBox.setEnabled(true);
+		}
+		
+		
+		// Get the parameters
+		final String choice = (String) comboBox.getSelectedItem();
+		final String[] parameters = new String[7];
+		parameters[0] = textFieldParam1.getText();
+		parameters[1] = textFieldParam2.getText();
+		parameters[2] = textFieldParam3.getText();
+		parameters[3] = textFieldParam4.getText();
+		parameters[4] = textFieldParam5.getText();
+		parameters[5] = textFieldParam6.getText();
+		parameters[6] = textFieldParam7.getText();
+		
+		// Get the current time
+		SimpleDateFormat dateTimeInGMT = new SimpleDateFormat("hh:mm:ss aa");
+		String time = dateTimeInGMT.format(new Date());
+		
+		textArea.setText("Generating Recommendations... (" + time + ")  \n");
+		
+        progressBar.setIndeterminate(true);
+        buttonShowRecommendations.setText("Stop");
+        comboBox.setEnabled(false);
+        
+		// RUN THE SELECTED ALGORITHM in a new thread
+		// create a thread to execute the algorithm
+		currentRunningAlgorithmThread = new NotifyingThread() {
+			@Override
+			public void doRun() throws Exception {
+				// this.setRecommendations(CommandProcessor.processGetRecommendationsCommandFromGUI(userSequence));
+			}
+		};
+		// The main thread will listen for the completion of the algorithm
+		currentRunningAlgorithmThread.addListener(this);
+		// The main thread will also listen for exception generated by the
+		// algorithm.
+		currentRunningAlgorithmThread.setUncaughtExceptionHandler(this);
+		// Run the thread
+		currentRunningAlgorithmThread.start();
+
+        try {
+            currentRunningAlgorithmThread.join();
+        } catch (InterruptedException e) {
+            System.out.println("error in joining threads"+ e.getMessage());
+            e.printStackTrace();
+        }
+        System.out.println("Recommendations in MainWindow"+recommendations);
+        recommendations = currentRunningAlgorithmThread.getRecommendations();
+        */
+	}
+    
 } 
+
