@@ -45,7 +45,7 @@ public  class DescrpitionAlgoRecommender extends DescriptionOfAlgorithm{
 				algo.runAlgorithm(userSeq, p, inputFile, outputFile);
 				algo.printStats();
 				this.recommendations= algo.getRecomms();
-				System.out.println("recomms in Descripto"+this.recommendations);
+				//System.out.println("recomms in Descripto"+this.recommendations);
 
         }
 	

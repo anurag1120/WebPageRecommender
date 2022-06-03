@@ -56,8 +56,8 @@ public class Rule{
             output+=",";
         }
       }
-      output+="]  sup "+this.support;
-      output+=" conf "+this.conf;
+      output+="]  #support "+this.support;
+      output+=" #confidence "+this.conf;
       return output;
     }
     

@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
@@ -14,6 +15,7 @@ import java.util.Map;
 import algorithmmanager.AlgorithmManager;
 import algorithmmanager.DescriptionOfAlgorithm;
 import algorithmmanager.DescriptionOfParameter;
+import recommendation.Recommender;
 import recommendation.Rule;
 
 /**
@@ -127,19 +129,40 @@ public class CommandProcessor {
 				}
 			}
 		}
+		Boolean showRecomms = false;
+		ArrayList<Integer> userSeq = new ArrayList<Integer>();
+		if (parameters.length >=4 && "".equals(parameters[3]) == false){
+			showRecomms=true;
+			 userSeq = getParamAsArrayList(parameters[3]);
+		}
 					// ******  WE  APPLY THE DESIRED ALGORITHM ******
 				 algorithm.runAlgorithm(parameters, inputFile, outputFile);
 				 if(algorithmName=="TRuleGrowth"){
 					System.out.println(
-						"The Generated Rules are"
+						"The Generated Rules are: "
 					);
 					for(int i=0;i<algorithm.rules.size();i++){
 						System.out.println(algorithm.rules.get(i));
 					}
+					if(showRecomms==true){
+						Recommender obj = new Recommender();
+						int pred = 3;
+						if(parameters.length>=5 && "".equals(parameters[4])==false){
+							pred = getParamAsInteger(parameters[4]);
+						}
+						obj.generateRecommendations(algorithm.rules, userSeq, 3, pred);
+							System.out.println(
+							"The Generated Recommendations are: "
+						);
+						Iterator itr = obj.getRecomms().iterator();
+						while(itr.hasNext()){
+							System.out.println(itr.next());
+						}
+					}
 				 }
 				 else if(algorithmName=="Recommender"){
 					System.out.println(
-						"The Generated Recommendations are"
+						"The Generated Recommendations are: "
 					);
 					Iterator itr = algorithm.recommendations.iterator();
 					while(itr.hasNext()){
@@ -147,6 +170,19 @@ public class CommandProcessor {
 					}
 				 }
 				 				 
+	}
+
+	protected static int getParamAsInteger(String value) {
+		return Integer.parseInt(value);
+	}
+
+	public static ArrayList<Integer> getParamAsArrayList(String line) {
+		String[] arr = line.split(" ");
+		ArrayList<Integer> userSeq = new ArrayList<Integer>();
+		for(String a: arr){
+			if(a.matches("-?\\d+(\\.\\d+)?")) userSeq.add(Integer.parseInt(a));
+		}
+		return userSeq;
 	}
 
 	public static void processGetRecommendationsCommandFromGUI() {
@@ -172,6 +208,11 @@ public class CommandProcessor {
 				return i + sufixes[i % 10];
 
 		}
+	}
+
+	public static void runEvaluation(String inputFile, String outputFile) {
+		Recommender obj = new Recommender();
+		obj.evaluatePerformance(inputFile,outputFile);
 	}
 
 }

@@ -43,16 +43,10 @@ public class DescriptionAlgoTRuleGrowth extends DescriptionOfAlgorithm {
 		int window = getParamAsInteger(parameters[2]);
 		LinkedList<Rule> rules;
 		TruleGrowthAlgo algo = new TruleGrowthAlgo();
-		if (parameters.length >=4 && "".equals(parameters[3]) == false) {
-			algo.setMaxAntecedentSize(getParamAsInteger(parameters[3]));
-		}
-		if (parameters.length >=5 && "".equals(parameters[4]) == false) {
-			algo.setMaxConsequentSize(getParamAsInteger(parameters[4]));
-		}
 		 algo.runAlgorithm(minsup, minconf, inputFile, outputFile, window);
 		algo.printStats();
 		this.rules = algo.getRules();
-		System.out.println("rules in Descripto"+this.rules);
+		//System.out.println("rules in Descripto"+this.rules);
 		return;
 	}
 

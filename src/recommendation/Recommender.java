@@ -18,10 +18,54 @@ public class Recommender {
     public Recommender() {
 	}
 
-    public void runAlgorithm(ArrayList<Integer> userSeq,int prediction,String input, String output){
-		LinkedList<Rule> rules = new LinkedList<Rule>();
+	public void evaluatePerformance(String input,String output){
+		timeStart = System.currentTimeMillis(); 
+		LinkedList<Rule> rules = getRulesFromFile(input);
+		int j;
+		j = (int)Math.round(rules.size()*0.7); // Using 70/30 rules for testing
 
-		//parse text
+		LinkedList<Rule> trianSet  = new LinkedList<Rule>();
+		LinkedList<Rule> testSet = new LinkedList<Rule>();
+		for(int i=0;i<rules.size();i++){
+			if(i<j){
+				trianSet.add(rules.get(i));
+			}
+			else{
+				testSet.add(rules.get(i));
+			}
+		}
+		int crct = 0, wrong= 0;
+		for(int i=0;i<testSet.size();i++){
+			 generateRecommendations(trianSet, testSet.get(i).getRuleLeft(), 3, 4);
+			 ArrayList<Integer> ruleRight = testSet.get(i).getRuleRight();
+			 Boolean isPresent = false;
+			 for(int k=0;k<ruleRight.size();k++){
+				 if(recommendations.contains(ruleRight.get(k))){
+					 isPresent=true;
+					 break;
+				 }
+				System.out.println("RuleRight  "+ruleRight);
+				System.out.println("Recomms  "+recommendations);
+
+
+			 }
+			 if(isPresent){
+				 crct++;
+			 }
+			 else{
+				 wrong++;
+			 }
+		}
+		System.out.println("Crct are  "+crct);
+		System.out.println("Wrong are  "+wrong);
+		double accuracy = (crct/(crct+wrong)) ;
+		timeEnd = System.currentTimeMillis(); 
+		printStats();
+		System.out.println("Accuracy is   "+accuracy);
+	}
+
+	public LinkedList<Rule> getRulesFromFile(String input){
+		LinkedList<Rule> rules = new LinkedList<Rule>();
 		// load the input file into memory
 		try {
 			File file = new File(input);
@@ -31,13 +75,22 @@ public class Recommender {
 			while((line=br.readLine())!=null){
 				rules.add(parseRule(line));
 			}
-
             
         } catch (Exception e) {
             System.out.println("Exception in opening file"+e);
         }
+		return rules;
+	}
+
+    public void runAlgorithm(ArrayList<Integer> userSeq,int prediction,String input, String output){
+		timeStart = System.currentTimeMillis(); 
+		LinkedList<Rule> rules = getRulesFromFile(input);
+		Collections.sort(rules,
+		new RuleSortingComparator());
+		MemoryLogger.getInstance().checkMemory();
+		generateRecommendations(rules, userSeq, 3, prediction);
+		timeEnd = System.currentTimeMillis(); 
 		printStats();
-		 generateRecommendations(rules, userSeq, 3, prediction);
 	}
 
 
@@ -110,6 +163,7 @@ public class Recommender {
 				if(itr.hasNext()) recommendedWebpages.add((Integer)itr.next());
 			}
 		}
+		MemoryLogger.getInstance().checkMemory();
 		this.recommendations = recommendedWebpages;
 		return;
 	}

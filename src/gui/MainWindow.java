@@ -36,6 +36,8 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
+import javax.swing.text.AbstractDocument.Content;
+
 import algorithmmanager.AlgorithmManager;
 import algorithmmanager.DescriptionOfAlgorithm;
 import algorithmmanager.DescriptionOfParameter;
@@ -141,7 +143,8 @@ public class MainWindow extends JFrame implements ThreadCompleteListener, Uncaug
         contentPane.setLayout(null);
 
 
-        contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+
+       // contentPane.setBorder(new EmptyBorder(3, 3, 3, 3));
         setContentPane(contentPane);
        
 
@@ -191,32 +194,31 @@ public class MainWindow extends JFrame implements ThreadCompleteListener, Uncaug
         buttonRun.addActionListener(new ActionListener() {
 
             public void actionPerformed(ActionEvent arg0) {
-
-                buttonShowRecommendations.setEnabled(true);
-
+                if(buttonShowRecommendations.getText()=="Accuracy")
+                    buttonShowRecommendations.setEnabled(true);
                 // When the user clicks "run":
                  processRunAlgorithmCommandFromGUI();
 
             }
         });
-        buttonRun.setBounds(297, 385, 119, 23);
+        buttonRun.setBounds(297, 485, 170, 23);
         contentPane.add(buttonRun);
 
          // The button "Run algorithm"
-         buttonShowRecommendations = new JButton("Show Recommendations");
+         buttonShowRecommendations = new JButton("Get Recommendations");
          buttonShowRecommendations.setEnabled(false);
          buttonShowRecommendations.addActionListener(new ActionListener() {
  
              public void actionPerformed(ActionEvent arg0) {
- 
-                 // When the user clicks "run":
-                 //TODO:
-                // processGetRecommendationsCommandFromGUI();
+
+                if(buttonShowRecommendations.getText()=="Accuracy"){
+                    processTestingAccuracyFromGUI();
+                }
  
              }
          });
          //TODO:
-         buttonShowRecommendations.setBounds(447, 385, 140, 23);
+         buttonShowRecommendations.setBounds(475, 485, 170, 23);
          contentPane.add(buttonShowRecommendations);
 
         JLabel lblChooseAnAlgorithm = new JLabel("Choose an algorithm:");
@@ -233,8 +235,12 @@ public class MainWindow extends JFrame implements ThreadCompleteListener, Uncaug
             }
         });
         lblNewLabel.setIcon(new ImageIcon(MainWindow.class.getResource("logo.jpg")));
-        lblNewLabel.setBounds(12, 13, 140, 50);
+        lblNewLabel.setBounds(500, 0, 320,200 );
+        
         contentPane.add(lblNewLabel);
+       // MyCanvas m = new MyCanvas();
+       // m.setBounds(12, 13, 50, 50);
+       // contentPane.add(m);
 
         textFieldParam1 = new JTextField();
         textFieldParam1.setBounds(360, 290, 157, 20);
@@ -324,11 +330,15 @@ public class MainWindow extends JFrame implements ThreadCompleteListener, Uncaug
         contentPane.add(textFieldParam7);
 
         JScrollPane scrollPane = new JScrollPane();
-        scrollPane.setBounds(750, 200, 581, 400);
+        scrollPane.setBounds(750, 200, 581, 500);
         contentPane.add(scrollPane);
 
         textArea = new JTextArea();
+        Font font = textArea.getFont();
+        float size = font.getSize() + 4.0f;
+        textArea.setFont( font.deriveFont(size) );
         scrollPane.setViewportView(textArea);
+
         System.setOut(new PrintStream(new TextAreaOutputStream(textArea)));
 
         textFieldInput = new JTextField();
@@ -345,7 +355,7 @@ public class MainWindow extends JFrame implements ThreadCompleteListener, Uncaug
         
         checkboxOpenOutputText = new JCheckBox("text editor");
         checkboxOpenOutputText.setSelected(true);
-        checkboxOpenOutputText.setBounds(44, 351, 85, 23);
+        checkboxOpenOutputText.setBounds(122, 540, 85, 23);
         contentPane.add(checkboxOpenOutputText);
 
         lblChooseInputFile = new JLabel("Choose input file");
@@ -385,13 +395,64 @@ public class MainWindow extends JFrame implements ThreadCompleteListener, Uncaug
         contentPane.add(lbHelp7);
         
         progressBar = new JProgressBar();
-        progressBar.setBounds(273, 600, 163, 16);
+        progressBar.setBounds(360, 600, 163, 16);
         contentPane.add(progressBar);
         
         lblOpenOutputFile = new JLabel("Open output file using: ");
-        lblOpenOutputFile.setBounds(119, 600, 191, 20);
+        lblOpenOutputFile.setBounds(119, 520, 191, 20);
         contentPane.add(lblOpenOutputFile);
         hideAllParams();
+    }
+
+
+    protected void processTestingAccuracyFromGUI() {
+            if(currentRunningAlgorithmThread != null &&
+            currentRunningAlgorithmThread.isAlive()) {
+        // stop that thread
+        currentRunningAlgorithmThread.stop();
+        
+        textArea.setText("Algorithm stopped. \n");
+        buttonShowRecommendations.setText("Accuracy");
+        progressBar.setIndeterminate(false);
+        progressBar.setEnabled(false);
+        comboBox.setEnabled(true);
+    }
+
+
+    // Get the current time
+    SimpleDateFormat dateTimeInGMT = new SimpleDateFormat("hh:mm:ss aa");
+    String time = dateTimeInGMT.format(new Date());
+
+    textArea.setText("Evaluating Performance... (" + time + ")  \n");
+
+    progressBar.setIndeterminate(true);
+    buttonShowRecommendations.setText("Stop");
+    comboBox.setEnabled(false);
+
+    // RUN THE SELECTED ALGORITHM in a new thread
+    // create a thread to execute the algorithm
+    currentRunningAlgorithmThread = new NotifyingThread() {
+        @Override
+        public void doRun() throws Exception {
+            CommandProcessor.runEvaluation( inputFile, outputFile);
+        }
+    };
+    // The main thread will listen for the completion of the algorithm
+    currentRunningAlgorithmThread.addListener(this);
+    // The main thread will also listen for exception generated by the
+    // algorithm.
+    currentRunningAlgorithmThread.setUncaughtExceptionHandler(this);
+    // Run the thread
+    currentRunningAlgorithmThread.start();
+
+    try {
+        currentRunningAlgorithmThread.join();
+    } catch (InterruptedException e) {
+        System.out.println("error in joining threads"+ e.getMessage());
+        e.printStackTrace();
+    }
+    progressBar.setIndeterminate(false);
+    progressBar.setEnabled(false);
     }
 
 
@@ -406,6 +467,15 @@ public class MainWindow extends JFrame implements ThreadCompleteListener, Uncaug
 	private void updateUserInterfaceAfterAlgorithmSelection(String algorithmName, boolean isSelected) throws Exception {
         // COMBOBOX ITEM SELECTION - ITEM STATE CHANGED
         if (isSelected) {
+            if(algorithmName=="Recommender"){
+                buttonRun.setText("Get Recommendations");
+                buttonShowRecommendations.setText("Accuracy");
+                buttonShowRecommendations.setEnabled(true);
+                checkboxOpenOutputText.setEnabled(false);
+            }else{
+                buttonRun.setText("Run Algorithm");
+                buttonShowRecommendations.setVisible(false);
+            }
             buttonRun.setEnabled(true);
             
             
@@ -425,7 +495,7 @@ public class MainWindow extends JFrame implements ThreadCompleteListener, Uncaug
     			DescriptionOfParameter[] parameters = algorithm.getParametersDescription();
     			for(int i=0; i< parameters.length; i++){
     				DescriptionOfParameter parameter = parameters[i];
-                    System.out.println(parameter.name);
+                    //System.out.println(parameter.name);
     				String optional = parameter.isOptional ? " (optional)" : "";
     				setParam(textFieldsParams[i], parameter.name + optional, labelsParams[i], parameter.example);
     			}
@@ -629,9 +699,10 @@ public class MainWindow extends JFrame implements ThreadCompleteListener, Uncaug
 		        PreferencesManager.getInstance().setInputFilePath(fc.getSelectedFile().getParent());
 		    }
 		} catch (Exception e) {
-		    JOptionPane.showMessageDialog(null,
-		            "An error occured while opening the input file dialog. ERROR MESSAGE = " + e.toString(), "Error",
-		            JOptionPane.ERROR_MESSAGE);
+            SwingUtilities.invokeLater(new Runnable(){ public void run() { JOptionPane.showMessageDialog(null,
+                "An error occured while opening the input file dialog. ERROR MESSAGE = " + e.toString(), "Error",
+                JOptionPane.ERROR_MESSAGE); }});
+		  
 		}
 	}
 
@@ -681,9 +752,10 @@ public class MainWindow extends JFrame implements ThreadCompleteListener, Uncaug
 		    }
 
 		} catch (Exception e) {
-		    JOptionPane.showMessageDialog(null,
-		            "An error occured while opening the output file dialog. ERROR MESSAGE = " + e.toString(), "Error",
-		            JOptionPane.ERROR_MESSAGE);
+            SwingUtilities.invokeLater(new Runnable(){ public void run() { JOptionPane.showMessageDialog(null,
+                "An error occured while opening the output file dialog. ERROR MESSAGE = " + e.toString(), "Error",
+                JOptionPane.ERROR_MESSAGE); }});
+		    
 		}
 		
 
@@ -732,6 +804,7 @@ public class MainWindow extends JFrame implements ThreadCompleteListener, Uncaug
 			}
 		buttonRun.setText("Run algorithm");
         progressBar.setIndeterminate(false);
+        progressBar.setEnabled(false);
         comboBox.setEnabled(true);
         }
 	}
@@ -745,7 +818,7 @@ public class MainWindow extends JFrame implements ThreadCompleteListener, Uncaug
 	@Override
 	public void uncaughtException(Thread thread, Throwable e) {
 		// If the thread just die because the user click on the "Stop algorithm" button
-		if(e instanceof ThreadDeath) {
+	/*	if(e instanceof ThreadDeath) {
 			// we just let the thread die.
 		}
 		else if(e instanceof NumberFormatException) {
@@ -761,8 +834,12 @@ public class MainWindow extends JFrame implements ThreadCompleteListener, Uncaug
                     "An error occurred while trying to run the algorithm. \n ERROR MESSAGE = " + e.toString(), "Error",
                     JOptionPane.ERROR_MESSAGE);
             e.printStackTrace();
-        }
-		textArea.setText("");
+        } */
+		textArea.setText("Sorry Something Went Wrong..\n"+e.getMessage());
+        comboBox.setEnabled(true);
+        progressBar.setIndeterminate(false);
+        progressBar.setVisible(false);
+        
 	}
 
 	/**
@@ -780,6 +857,7 @@ public class MainWindow extends JFrame implements ThreadCompleteListener, Uncaug
 			textArea.setText("Algorithm stopped. \n");
 			buttonRun.setText("Run algorithm");
 	        progressBar.setIndeterminate(false);
+            progressBar.setVisible(false);
 	        comboBox.setEnabled(true);
 		}
 		
@@ -808,7 +886,8 @@ public class MainWindow extends JFrame implements ThreadCompleteListener, Uncaug
 		// RUN THE SELECTED ALGORITHM in a new thread
 		// create a thread to execute the algorithm
 		currentRunningAlgorithmThread = new NotifyingThread() {
-			@Override
+            
+            @Override
 			public void doRun() throws Exception {
                 CommandProcessor.runAlgorithm(choice, inputFile, outputFile, parameters);
 			}
@@ -824,10 +903,12 @@ public class MainWindow extends JFrame implements ThreadCompleteListener, Uncaug
         try {
             currentRunningAlgorithmThread.join();
         } catch (InterruptedException e) {
-            System.out.println("error in joining threads"+ e.getMessage());
+            System.out.println("Error in joining threads"+ e.getMessage());
             e.printStackTrace();
         }
 	}
+
+    
 
 	/**
 	 * This method is called when the user click the "Run" or "Stop" button of the user interface,

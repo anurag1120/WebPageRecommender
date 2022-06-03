@@ -100,7 +100,7 @@ public class AlgorithmManager {
 			listOfNames.add(algorithm.getName());
 			
 		}
-		System.out.println("Algorithm names"+listOfNames);
+		//System.out.println("Algorithm names"+listOfNames);
 		// Return the list
 		return listOfNames;
 	}
@@ -175,7 +175,7 @@ public class AlgorithmManager {
 					Class theClass = Class.forName(originalPackageName + entryName);
 					if(theClass.getSuperclass().equals(DescriptionOfAlgorithm.class)){
 						DescriptionOfAlgorithm instance = (DescriptionOfAlgorithm) theClass.newInstance();
-						System.out.println("instance in alog manger "+instance);
+						//System.out.println("instance in alog manger "+instance);
 						classes.add(instance);
 					}
 				}
@@ -190,10 +190,10 @@ public class AlgorithmManager {
 	 * @return the description of the algorithm (a DescriptionOfAlgorithm object), or null if not found
 	 */
 	public DescriptionOfAlgorithm getDescriptionOfAlgorithm(String nameOfAlgorithm) {
-		System.out.println(nameOfAlgorithm+", "+algorithms);
+		//System.out.println(nameOfAlgorithm+", "+algorithms);
 
 		for(DescriptionOfAlgorithm algorithm : algorithms){
-			System.out.println(algorithm.getName());
+			//System.out.println(algorithm.getName());
 			// if this algorithm belong to a new category, we will add the category name to the list of algorithms
 			if(algorithm.getName().equals(nameOfAlgorithm)){
 				return algorithm;
