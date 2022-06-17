@@ -15,12 +15,13 @@ public class Recommender {
 	long timeStart = 0; // start time of latest execution
 	long timeEnd = 0;  // end time of latest execution]
 	LinkedHashSet<Integer> recommendations;
+	LinkedList<Rule> rules;
     public Recommender() {
 	}
 
-	public void evaluatePerformance(String input,String output){
+/* 	public void evaluatePerformance(String input,String output){
 		timeStart = System.currentTimeMillis(); 
-		LinkedList<Rule> rules = getRulesFromFile(input);
+		rules = getRulesFromFile(input);
 		int j;
 		j = (int)Math.round(rules.size()*0.7); // Using 70/30 rules for testing
 
@@ -63,9 +64,9 @@ public class Recommender {
 		printStats();
 		System.out.println("Accuracy is   "+accuracy);
 	}
-
-	public LinkedList<Rule> getRulesFromFile(String input){
-		LinkedList<Rule> rules = new LinkedList<Rule>();
+*/
+	public void getRulesFromFile(String input){
+		 rules = new LinkedList<Rule>();
 		// load the input file into memory
 		try {
 			File file = new File(input);
@@ -79,18 +80,22 @@ public class Recommender {
         } catch (Exception e) {
             System.out.println("Exception in opening file"+e);
         }
-		return rules;
 	}
 
     public void runAlgorithm(ArrayList<Integer> userSeq,int prediction,String input, String output){
 		timeStart = System.currentTimeMillis(); 
-		LinkedList<Rule> rules = getRulesFromFile(input);
+		getRulesFromFile(input);
+		System.out.println("Rules are loaded into memory");
 		Collections.sort(rules,
 		new RuleSortingComparator());
 		MemoryLogger.getInstance().checkMemory();
-		generateRecommendations(rules, userSeq, 3, prediction);
+		generateRecommendations( userSeq, 3, prediction);
 		timeEnd = System.currentTimeMillis(); 
 		printStats();
+	}
+
+	public void setRules(LinkedList<Rule> rules){
+		this.rules = rules;
 	}
 
 
@@ -133,13 +138,14 @@ public class Recommender {
 	}
 
 	//prediction:  no of recommendations
-	public  void generateRecommendations(LinkedList<Rule> rules,ArrayList<Integer> pattern,int threshold,int prediction){
+	public  void generateRecommendations(ArrayList<Integer> pattern,int threshold,int prediction){
 		LinkedHashSet<Integer> recommendedWebpages = new LinkedHashSet<Integer>();
 		LinkedHashSet<Integer> popularWebpages = new LinkedHashSet<Integer>();
 		ArrayList<Integer> cutoffPattern = new ArrayList<Integer>();
 		for(int i=0;i<pattern.size()&&i<threshold;i++) {
 			cutoffPattern.add(pattern.get(pattern.size()-i-1));
 		}
+		ArrayList random = new ArrayList<>();
 		//for getting better recommedations
 		Collections.reverse(cutoffPattern);
 		for(int i=0;i<rules.size();i++) {
@@ -151,13 +157,17 @@ public class Recommender {
 					break;
 				}else {
 					recommendedWebpages.addAll(ruleRight);
+					if(random.size()<2) random.addAll(ruleRight);
 				}
-			}else{
-				if(popularWebpages.size()<prediction) popularWebpages.addAll(ruleRight);
 			}
 		}
-		//in all cases (except where there are no rules) try to recommend atleast 3 pages
+		for(int i=0;i<Math.min(rules.size(),15);i++){
+			popularWebpages.addAll(rules.get(i).getRuleRight());
+		}
+		
+		//in all cases (except where there are no rules) try to recommend some popular pages
 		Iterator itr = popularWebpages.iterator();
+		
 		if(recommendedWebpages.size()<prediction){
 			for(int i=1;i<=prediction-recommendedWebpages.size();i++){
 				if(itr.hasNext()) recommendedWebpages.add((Integer)itr.next());
@@ -165,6 +175,7 @@ public class Recommender {
 		}
 		MemoryLogger.getInstance().checkMemory();
 		this.recommendations = recommendedWebpages;
+		//System.out.println("in generate recommendations"+recommendedWebpages);
 		return;
 	}
 

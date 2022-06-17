@@ -6,6 +6,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -15,7 +16,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+
+import recommendation.Recommender;
 import recommendation.Rule;
+import recommendation.RuleSortingComparator;
 import util.Utility;
 import tools.ArraysAlgos;
 import sequence_database_list_integers.Sequence;
@@ -29,7 +33,11 @@ public class TruleGrowthAlgo{
 	long timeStart = 0; // start time of latest execution
 	long timeEnd = 0;  // end time of latest execution
 	
-	
+	double accuracy = 0;
+	public double getAccuracy() {
+		return accuracy;
+	}
+
 	//*** internal variables ***/
 	// A map to record the occurences of each item in each sequence
 	// KEY: an item
@@ -42,6 +50,9 @@ public class TruleGrowthAlgo{
 	
 	// The number of patterns found
 	int ruleCount;
+
+	int test_size;
+	int train_size;
 	
 	// object to write the output file
 	BufferedWriter writer = null; 
@@ -70,6 +81,48 @@ public class TruleGrowthAlgo{
 	public LinkedList<Rule> getRules(){
 		return rules;
 	}
+
+	public void performanceEvaluation(){
+		int crct, wrong;
+		crct =wrong = 0;
+		Collections.sort(rules,
+		new RuleSortingComparator());
+		 
+		//Create a recommender model
+		Recommender obj = new Recommender();
+		//the rules are generated set them to recommender
+		obj.setRules(rules);
+		// for each test sequence generate recommendations and compare right parts
+		int p = 0;
+		for(int i=0;i<test_size;i++){
+			Sequence sequence = database.getSequences().get(i);
+			ArrayList<Integer> userSeq = new ArrayList<>();
+			int mid = (int)Math.round(sequence.size()/2);
+			for( p=0;p<Math.min(3,mid);p++){
+				if(sequence.get(p).size()>=1)
+				userSeq.add(sequence.get(p).get(0)); //only one item is present in each item set
+			}
+		obj.generateRecommendations(userSeq, 3, 5);
+		Boolean isPresent = false;
+		//checking if right part any symbol is present in recommendations
+		   for(;p<sequence.size();p++) 
+		       if(obj.getRecomms().contains(sequence.get(p).get(0))){
+				   isPresent=true;
+				   break;
+			   }
+		if(isPresent==true) crct++; 
+		else wrong++;
+
+		}
+		accuracy = (crct*1.0/test_size)*100;
+		System.out.println("Test size is "+test_size+" Total size is "+database.size());
+		accuracy = Math.round(accuracy*100)/100;
+		System.out.println("Accuracy is "+accuracy+"%");
+		System.out.println(" Correct  "+ crct);
+		System.out.println(" Wrong  "+wrong);
+
+
+	}
 	/**
 	 * Run the algorithm.  
 	 * @param minSupport  Minsup as a percentage (ex: 0.05 = 5 %)
@@ -89,12 +142,21 @@ public class TruleGrowthAlgo{
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+
+		//setting test size
+		test_size = (int)Math.round((database.size()*(0.3)));
+		train_size = database.size()- test_size;
 		
 		// convert minimum support to an absolute minimum support (integer)
-		this.minsuppRelative = (int) Math.ceil(minSupport * database.size());
+		this.minsuppRelative = (int) Math.ceil(minSupport * train_size); //TODO: is database.size shoud be changed to train point your honour
 		// run the algorithm
 		runAlgorithm(input, output, minsuppRelative, minConfidence, windowSize);
+
+		
 	}
+
+
+
 	
 	/**
 	 * Run the algorithm.
@@ -285,6 +347,8 @@ public class TruleGrowthAlgo{
 					}
 				}
 		}
+
+		performanceEvaluation();
 		// save the end time for the execution of the algorithm
 		timeEnd = System.currentTimeMillis(); // for stats
 		
@@ -828,7 +892,8 @@ public class TruleGrowthAlgo{
 		mapItemCount = new HashMap<Integer, Map<Integer, Occurence>>(); // <item, Map<tid, occurence>>
 		
 		// for each sequence in the database
-		for(Sequence sequence : database.getSequences()){
+		for(int k=test_size;k<database.size();k++){
+			Sequence sequence = database.getSequences().get(k);
 			// for each itemset in that sequence
 			for(short j=0; j< sequence.getItemsets().size(); j++){
 				List<Integer> itemset = sequence.get(j);
@@ -858,7 +923,8 @@ public class TruleGrowthAlgo{
 		// (2) remove all items that are not frequent from the database
 		
 		// for each sequence
-		for(Sequence sequence : database.getSequences()){
+		for(int k=test_size;k<database.size();k++){
+			Sequence sequence = database.getSequences().get(k);
 			int i=0;
 			
 			// for each itemset

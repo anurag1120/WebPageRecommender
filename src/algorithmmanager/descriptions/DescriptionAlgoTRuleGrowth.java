@@ -46,6 +46,7 @@ public class DescriptionAlgoTRuleGrowth extends DescriptionOfAlgorithm {
 		 algo.runAlgorithm(minsup, minconf, inputFile, outputFile, window);
 		algo.printStats();
 		this.rules = algo.getRules();
+		this.accuracy = algo.getAccuracy();
 		//System.out.println("rules in Descripto"+this.rules);
 		return;
 	}

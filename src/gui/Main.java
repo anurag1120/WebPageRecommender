@@ -23,6 +23,10 @@ public class Main {
 		// If there are command line arguments, we don't launch
 		// the user interface. It means that the user is using
 		// the command line.
+		long heapSize = Runtime.getRuntime().totalMemory();
+
+        //Print the jvm heap size.
+        System.out.println("Heap Size = " + heapSize);
 
 		if (args.length != 0) {
 			// process command line arguments.

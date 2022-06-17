@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -12,7 +13,7 @@ import java.util.Set;
 public class SequenceDatabase {
 
 	// variable that contains the sequences of this database
-	private final List<Sequence> sequences = new ArrayList<Sequence>();
+	final private List<Sequence> sequences = new ArrayList<Sequence>();
 
 	/**
 	 * Method to load a sequence database from a text file in SPMF format.
@@ -38,6 +39,9 @@ public class SequenceDatabase {
 					addSequence(thisLine.split(" "));
 				}
 			}
+		 	//shuffling the sequences and getting the test sequences from "sequences" list
+			Collections.shuffle(sequences);
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
@@ -152,6 +156,7 @@ public class SequenceDatabase {
 	public List<Sequence> getSequences() {
 		return sequences;
 	}
+
 
 	/**
 	 * Get the list of sequence IDs for this database.

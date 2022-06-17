@@ -28,6 +28,8 @@ public class CommandProcessor {
 
 	}
 
+	public static double accuracy = -1;
+
 	/**
 	 * This method run an algorithm. It is called from the GUI interface or when
 	 * the user run the jar file from the command line.
@@ -44,6 +46,8 @@ public class CommandProcessor {
 	 */
 	public static void runAlgorithm(String algorithmName,
 			String inputFile, String outputFile, String[] parameters) throws Exception {
+
+		
 	
 		Map<Integer, String> mapItemToString = null;
 		// This variable store the path of the original output file
@@ -150,7 +154,8 @@ public class CommandProcessor {
 						if(parameters.length>=5 && "".equals(parameters[4])==false){
 							pred = getParamAsInteger(parameters[4]);
 						}
-						obj.generateRecommendations(algorithm.rules, userSeq, 3, pred);
+						obj.setRules(algorithm.rules);
+						obj.generateRecommendations( userSeq, 3, pred);
 							System.out.println(
 							"The Generated Recommendations are: "
 						);
@@ -158,6 +163,8 @@ public class CommandProcessor {
 						while(itr.hasNext()){
 							System.out.println(itr.next());
 						}
+						accuracy = algorithm.accuracy;
+						System.out.println("Accuracy is"+algorithm.accuracy);
 					}
 				 }
 				 else if(algorithmName=="Recommender"){
@@ -167,6 +174,9 @@ public class CommandProcessor {
 					Iterator itr = algorithm.recommendations.iterator();
 					while(itr.hasNext()){
 						System.out.println(itr.next());
+					}
+					if(accuracy!=-1){
+						System.out.println("Accuracy is"+accuracy);
 					}
 				 }
 				 				 
@@ -211,8 +221,7 @@ public class CommandProcessor {
 	}
 
 	public static void runEvaluation(String inputFile, String outputFile) {
-		Recommender obj = new Recommender();
-		obj.evaluatePerformance(inputFile,outputFile);
+		// TODO clean up
 	}
 
 }

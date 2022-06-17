@@ -43,7 +43,6 @@ public  class DescrpitionAlgoRecommender extends DescriptionOfAlgorithm{
                 int p = getParamAsInteger(parameters[1]);
                 Recommender algo = new Recommender();
 				algo.runAlgorithm(userSeq, p, inputFile, outputFile);
-				algo.printStats();
 				this.recommendations= algo.getRecomms();
 				//System.out.println("recomms in Descripto"+this.recommendations);
 
@@ -88,7 +87,7 @@ public  class DescrpitionAlgoRecommender extends DescriptionOfAlgorithm{
 	 * @return a list of file types (Strings) or null if the algorithm does not output a file.
 	 */
 	public  String[] getOutputFileTypes(){
-		return new String[]{"Recommendations"};
+		return null;
 	}
 	
 

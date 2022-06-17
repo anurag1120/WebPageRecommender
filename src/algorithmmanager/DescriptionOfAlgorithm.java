@@ -11,6 +11,7 @@ public abstract class DescriptionOfAlgorithm {
 
 	public LinkedList<Rule> rules;
 	public LinkedHashSet<Integer> recommendations;
+	public double accuracy;
 	
 	/** get the  name of the author of the implementation */
 	public abstract String getImplementationAuthorNames();
